@@ -107,14 +107,14 @@ typedef struct {
 	const uint16_t *p;
 	const uint16_t *b;
 	const uint16_t *R2;
-	uint16_t p0i;
+	uint32_t p0i;
 	size_t point_len;
 } curve_params;
 
 static inline const curve_params *
 id_to_curve(int curve)
 {
-	static const curve_params pp[] = {
+	static const curve_params pp[] PROGMEM = {
 		{ P256_P, P256_B, P256_R2, 0x0001,  65 },
 		{ P384_P, P384_B, P384_R2, 0x0001,  97 },
 		{ P521_P, P521_B, P521_R2, 0x0001, 133 }

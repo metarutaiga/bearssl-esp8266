@@ -30,7 +30,7 @@ br_rsa_pkcs1_sig_unpad(const unsigned char *sig, size_t sig_len,
 	const unsigned char *hash_oid, size_t hash_len,
 	unsigned char *hash_out)
 {
-	static const unsigned char pad1[] = {
+	static const unsigned char pad1[] PROGMEM = {
 		0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 	};
 
@@ -71,7 +71,7 @@ br_rsa_pkcs1_sig_unpad(const unsigned char *sig, size_t sig_len,
 	 * The comparison is valid because we made sure that the signature
 	 * is at least 11 bytes long.
 	 */
-	if (memcmp(sig, pad1, sizeof pad1) != 0) {
+	if (memcmp_P(sig, pad1, sizeof pad1) != 0) {
 		return 0;
 	}
 	for (u = sizeof pad1; u < sig_len; u ++) {

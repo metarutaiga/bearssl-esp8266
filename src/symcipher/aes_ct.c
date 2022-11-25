@@ -233,10 +233,6 @@ br_aes_ct_ortho(uint32_t *q)
 	SWAP8(q[3], q[7]);
 }
 
-static const unsigned char Rcon[] = {
-	0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36
-};
-
 static uint32_t
 sub_word(uint32_t x)
 {
@@ -260,6 +256,18 @@ br_aes_ct_keysched(uint32_t *comp_skey, const void *key, size_t key_len)
 	int i, j, k, nk, nkf;
 	uint32_t tmp;
 	uint32_t skey[120];
+	unsigned char Rcon[10];
+
+	Rcon[0] = 0x01;
+	Rcon[1] = 0x02;
+	Rcon[2] = 0x04;
+	Rcon[3] = 0x08;
+	Rcon[4] = 0x10;
+	Rcon[5] = 0x20;
+	Rcon[6] = 0x40;
+	Rcon[7] = 0x80;
+	Rcon[8] = 0x1B;
+	Rcon[9] = 0x36;
 
 	switch (key_len) {
 	case 16:

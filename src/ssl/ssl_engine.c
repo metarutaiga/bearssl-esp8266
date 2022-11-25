@@ -1347,7 +1347,7 @@ br_ssl_engine_compute_master(br_ssl_engine_context *cc,
 
 	iprf = br_ssl_engine_get_PRF(cc, prf_id);
 	iprf(cc->session.master_secret, sizeof cc->session.master_secret,
-		pms, pms_len, "master secret", 2, seed);
+		pms, pms_len, PSTR("master secret"), 2, seed);
 }
 
 /*
@@ -1366,7 +1366,7 @@ compute_key_block(br_ssl_engine_context *cc, int prf_id,
 	iprf = br_ssl_engine_get_PRF(cc, prf_id);
 	iprf(kb, half_len << 1,
 		cc->session.master_secret, sizeof cc->session.master_secret,
-		"key expansion", 2, seed);
+		PSTR("key expansion"), 2, seed);
 }
 
 /* see inner.h */

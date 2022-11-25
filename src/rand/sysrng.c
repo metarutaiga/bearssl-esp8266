@@ -266,7 +266,7 @@ br_prng_seeder_system(const char **name)
 	return &seeder_win32;
 #elif BR_USE_ESP8266_RAND
         if (name != NULL) {
-                *name = "esp8266";
+                *name = PSTR("esp8266");
         }
         return &seeder_esp8266;
 #else

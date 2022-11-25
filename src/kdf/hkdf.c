@@ -24,7 +24,7 @@
 
 #include "inner.h"
 
-const unsigned char br_hkdf_no_salt = 0;
+const unsigned char br_hkdf_no_salt PROGMEM = 0;
 
 /* see bearssl_kdf.h */
 void

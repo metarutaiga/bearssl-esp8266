@@ -97,7 +97,7 @@ extern const unsigned char HASH_OID_SHA256[];
 extern const unsigned char HASH_OID_SHA384[];
 extern const unsigned char HASH_OID_SHA512[];
 
-static const unsigned char *HASH_OID[] PROGMEM = {
+static const unsigned char * const HASH_OID[] PROGMEM = {
 	HASH_OID_SHA1,
 	HASH_OID_SHA224,
 	HASH_OID_SHA256,
@@ -111,6 +111,7 @@ cc_do_sign(const br_ssl_client_certificate_class **pctx,
 {
 	br_ssl_client_certificate_rsa_context *zc;
 	unsigned char hv[64];
+	unsigned char hash_oid_ram[10];
 	const unsigned char *hash_oid;
 	size_t sig_len;
 
@@ -119,7 +120,8 @@ cc_do_sign(const br_ssl_client_certificate_class **pctx,
 	if (hash_id == 0) {
 		hash_oid = NULL;
 	} else if (hash_id >= 2 && hash_id <= 6) {
-		hash_oid = HASH_OID[hash_id - 2];
+		memcpy_P(hash_oid_ram, HASH_OID[hash_id - 2], sizeof(HASH_OID[0]));
+		hash_oid = hash_oid_ram;
 	} else {
 		return 0;
 	}

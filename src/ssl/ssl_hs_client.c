@@ -171,12 +171,12 @@ make_pms_rsa(br_ssl_client_context *ctx, int prf_id)
 /*
  * OID for hash functions in RSA signatures.
  */
-static const unsigned char *HASH_OID[] PROGMEM = {
-	BR_HASH_OID_SHA1,
-	BR_HASH_OID_SHA224,
-	BR_HASH_OID_SHA256,
-	BR_HASH_OID_SHA384,
-	BR_HASH_OID_SHA512
+static const unsigned char HASH_OID[][10] PROGMEM = {
+	{ 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A },                         // HASH_OID_SHA1,
+	{ 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04 }, // HASH_OID_SHA224,
+	{ 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01 }, // HASH_OID_SHA256,
+	{ 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02 }, // HASH_OID_SHA384,
+	{ 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03 }  // HASH_OID_SHA512
 };
 
 /*
@@ -229,10 +229,12 @@ verify_SKE_sig(br_ssl_client_context *ctx,
 	}
 	if (use_rsa) {
 		unsigned char tmp[64];
+		unsigned char hash_oid_ram[10];
 		const unsigned char *hash_oid;
 
 		if (hash) {
-			hash_oid = HASH_OID[hash - 2];
+			memcpy_P(hash_oid_ram, HASH_OID[hash - 2], sizeof(HASH_OID[0]));
+			hash_oid = hash_oid_ram;
 		} else {
 			hash_oid = NULL;
 		}
@@ -1224,7 +1226,7 @@ br_ssl_hs_client_run(void *t0ctx)
 	}
 	prf(ENG->pad, 12, ENG->session.master_secret,
 		sizeof ENG->session.master_secret,
-		from_client ? "client finished" : "server finished",
+		from_client ? PSTR("client finished") : PSTR("server finished"),
 		1, &seed);
 
 				}

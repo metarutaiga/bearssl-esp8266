@@ -30,7 +30,7 @@
  *   - R^2 mod p (R = 2^(15k) for the smallest k such that R >= p)
  */
 
-static const uint16_t C255_P[] = {
+static const uint16_t C255_P[] PROGMEM = {
 	0x0110,
 	0x7FED, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
 	0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF, 0x7FFF,
@@ -39,7 +39,7 @@ static const uint16_t C255_P[] = {
 
 #define P0I   0x4A1B
 
-static const uint16_t C255_R2[] = {
+static const uint16_t C255_R2[] PROGMEM = {
 	0x0110,
 	0x0169, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -67,7 +67,7 @@ print_int_mont(const char *name, const uint16_t *x)
 }
 */
 
-static const uint16_t C255_A24[] = {
+static const uint16_t C255_A24[] PROGMEM = {
 	0x0110,
 	0x45D3, 0x0046, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
 	0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,
@@ -134,11 +134,14 @@ c255_add(uint16_t *d, const uint16_t *a, const uint16_t *b)
 {
 	uint32_t ctl;
 	uint16_t t[18];
+	uint16_t c255_p[sizeof C255_P];
 
 	memcpy_P(t, a, sizeof t);
+	memcpy_P(c255_p, C255_P, sizeof C255_P);
+
 	ctl = br_i15_add(t, b, 1);
-	ctl |= NOT(br_i15_sub(t, C255_P, 0));
-	br_i15_sub(t, C255_P, ctl);
+	ctl |= NOT(br_i15_sub(t, c255_p, 0));
+	br_i15_sub(t, c255_p, ctl);
 	memcpy(d, t, sizeof t);
 }
 
@@ -146,9 +149,12 @@ static void
 c255_sub(uint16_t *d, const uint16_t *a, const uint16_t *b)
 {
 	uint16_t t[18];
+	uint16_t c255_p[sizeof C255_P];
 
 	memcpy_P(t, a, sizeof t);
-	br_i15_add(t, C255_P, br_i15_sub(t, b, 1));
+	memcpy_P(c255_p, C255_P, sizeof C255_P);
+
+	br_i15_add(t, c255_p, br_i15_sub(t, b, 1));
 	memcpy(d, t, sizeof t);
 }
 
@@ -156,8 +162,11 @@ static void
 c255_mul(uint16_t *d, const uint16_t *a, const uint16_t *b)
 {
 	uint16_t t[18];
+	uint16_t c255_p[sizeof C255_P];
 
-	br_i15_montymul(t, a, b, C255_P, P0I);
+	memcpy_P(c255_p, C255_P, sizeof C255_P);
+
+	br_i15_montymul(t, a, b, c255_p, P0I);
 	memcpy(d, t, sizeof t);
 }
 
@@ -191,6 +200,13 @@ api_mul(unsigned char *G, size_t Glen,
 	unsigned char k[32];
 	uint32_t swap;
 	int i;
+	uint16_t c255_p[sizeof C255_P];
+	uint16_t c255_r2[sizeof C255_R2];
+	uint16_t c255_a24[sizeof C255_A24];
+
+	memcpy_P(c255_p, C255_P, sizeof C255_P);
+	memcpy_P(c255_r2, C255_R2, sizeof C255_R2);
+	memcpy_P(c255_a24, C255_A24, sizeof C255_A24);
 
 	(void)curve;
 
@@ -226,15 +242,15 @@ api_mul(unsigned char *G, size_t Glen,
 	b[18] = 1;
 	br_i15_decode_mod(a, G, 32, b);
 	a[0] = 0x110;
-	br_i15_sub(a, C255_P, NOT(br_i15_sub(a, C255_P, 0)));
+	br_i15_sub(a, c255_p, NOT(br_i15_sub(a, c255_p, 0)));
 
 	/*
 	 * Initialise variables x1, x2, z2, x3 and z3. We set all of them
 	 * into Montgomery representation.
 	 */
-	br_i15_montymul(x1, a, C255_R2, C255_P, P0I);
+	br_i15_montymul(x1, a, c255_r2, c255_p, P0I);
 	memcpy(x3, x1, ILEN);
-	br_i15_zero(z2, C255_P[0]);
+	br_i15_zero(z2, c255_p[0]);
 	memcpy(x2, z2, ILEN);
 	x2[1] = 19;
 	memcpy(z3, x2, ILEN);
@@ -294,7 +310,7 @@ api_mul(unsigned char *G, size_t Glen,
 		c255_mul(z3, z3, z3);
 		c255_mul(z3, z3, x1);
 		c255_mul(x2, aa, bb);
-		c255_mul(z2, C255_A24, e);
+		c255_mul(z2, c255_a24, e);
 		c255_add(z2, z2, aa);
 		c255_mul(z2, e, z2);
 
@@ -341,9 +357,9 @@ api_mul(unsigned char *G, size_t Glen,
 	 *    memcpy(x2, b, ILEN);
 	 *    br_i15_from_monty(x2, C255_P, P0I);
 	 */
-	br_i15_zero(a, C255_P[0]);
+	br_i15_zero(a, c255_p[0]);
 	a[1] = 1;
-	br_i15_montymul(x2, a, b, C255_P, P0I);
+	br_i15_montymul(x2, a, b, c255_p, P0I);
 
 	br_i15_encode(G, 32, x2);
 	byteswap(G);

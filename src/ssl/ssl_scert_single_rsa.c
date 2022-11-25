@@ -83,27 +83,27 @@ sr_do_keyx(const br_ssl_server_policy_class **pctx,
 /*
  * OID for hash functions in RSA signatures.
  */
-/*static*/ const unsigned char HASH_OID_SHA1[] = {
+/*static*/ const unsigned char HASH_OID_SHA1[] PROGMEM = {
 	0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A
 };
 
-/*static*/ const unsigned char HASH_OID_SHA224[] = {
+/*static*/ const unsigned char HASH_OID_SHA224[] PROGMEM = {
 	0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04
 };
 
-/*static*/ const unsigned char HASH_OID_SHA256[] = {
+/*static*/ const unsigned char HASH_OID_SHA256[] PROGMEM = {
 	0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01
 };
 
-/*static*/ const unsigned char HASH_OID_SHA384[] = {
+/*static*/ const unsigned char HASH_OID_SHA384[] PROGMEM = {
 	0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02
 };
 
-/*static*/ const unsigned char HASH_OID_SHA512[] = {
+/*static*/ const unsigned char HASH_OID_SHA512[] PROGMEM = {
 	0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03
 };
 
-static const unsigned char *HASH_OID[] PROGMEM = {
+static const unsigned char * const HASH_OID[] PROGMEM = {
 	HASH_OID_SHA1,
 	HASH_OID_SHA224,
 	HASH_OID_SHA256,
@@ -118,6 +118,7 @@ sr_do_sign(const br_ssl_server_policy_class **pctx,
 	br_ssl_server_policy_rsa_context *pc;
 	unsigned char hv[64];
 	size_t sig_len;
+	unsigned char hash_oid_ram[10];
 	const unsigned char *hash_oid;
 
 	pc = (br_ssl_server_policy_rsa_context *)pctx;
@@ -126,7 +127,8 @@ sr_do_sign(const br_ssl_server_policy_class **pctx,
 	if (algo_id == 0) {
 		hash_oid = NULL;
 	} else if (algo_id >= 2 && algo_id <= 6) {
-		hash_oid = HASH_OID[algo_id - 2];
+		memcpy_P(hash_oid_ram, HASH_OID[algo_id - 2], sizeof(HASH_OID[0]));
+		hash_oid = hash_oid_ram;
 	} else {
 		return 0;
 	}

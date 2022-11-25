@@ -28,11 +28,14 @@
 int
 br_ssl_choose_hash(unsigned bf)
 {
-	static const unsigned char pref[] = {
-		br_sha256_ID, br_sha384_ID, br_sha512_ID,
-		br_sha224_ID, br_sha1_ID
-	};
+	unsigned char pref[5];
 	size_t u;
+
+	pref[0] = br_sha256_ID;
+	pref[1] = br_sha384_ID;
+	pref[2] = br_sha512_ID;
+	pref[3] = br_sha224_ID;
+	pref[4] = br_sha1_ID;
 
 	for (u = 0; u < sizeof pref; u ++) {
 		int x;
