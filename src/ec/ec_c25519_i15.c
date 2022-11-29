@@ -376,7 +376,7 @@ api_mulgen(unsigned char *R,
 	size_t Glen;
 
 	G = api_generator(curve, &Glen);
-	memcpy(R, G, Glen);
+	memcpy_P(R, G, Glen);
 	api_mul(R, Glen, x, xlen, curve);
 	return Glen;
 }
